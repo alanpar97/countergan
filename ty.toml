@@ -1,0 +1,13 @@
+[src]
+exclude = [
+    "build",
+    "dist",
+    "docs",
+    "original_code",
+    "mypy_cache",
+    "node_modules",
+    "pytest_cache",
+    "site-packages",
+    "venv",
+    "example"
+]

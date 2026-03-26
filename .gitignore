@@ -1,0 +1,17 @@
+#Agents
+.claude
+CLAUDE.md
+
+#Venv
+.venv
+uv.lock
+
+#Others
+.DS_Store
+.idea
+.python-version
+
+#Cache
+__pycache__
+
+
