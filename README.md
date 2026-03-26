@@ -12,20 +12,20 @@ This repository is a packaged version of the [original CounteRGAN code](https://
 
 ## Installation
 
-The base package depends only on NumPy. Install with your preferred backend:
+Install directly from GitHub with your preferred backend:
 
 ```bash
 # PyTorch (default / recommended)
-pip install "countergan[torch]"
+pip install "countergan[torch] @ git+https://github.com/alanpar97/countergan.git"
 
 # TensorFlow / Keras
-pip install "countergan[tensorflow]"
+pip install "countergan[tensorflow] @ git+https://github.com/alanpar97/countergan.git"
 ```
 
 To also install the dependencies needed to run the example:
 
 ```bash
-pip install "countergan[torch]" pandas scikit-learn
+pip install "countergan[torch] @ git+https://github.com/alanpar97/countergan.git" pandas scikit-learn
 ```
 
 > Requires Python 3.12+.
