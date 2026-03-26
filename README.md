@@ -8,7 +8,7 @@ Based on the paper:
 >
 > [arXiv:2009.05199](https://arxiv.org/abs/2009.05199)
 
-This repository is a packaged version of the [original CounteRGAN code](https://github.com/nkthiebaut/countergan), restructured as an installable Python library.
+This repository is a packaged version of the [original CounteRGAN code](https://github.com/gan-counterfactuals/countergan/tree/main), restructured as an installable Python library.
 
 ## Installation
 
