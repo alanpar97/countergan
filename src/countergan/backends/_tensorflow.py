@@ -104,7 +104,7 @@ class TensorFlowBackend(Backend):
 
         sample_weights = None
         if weighted:
-            scores = classifier.predict(x_batch)[:, desired_class]
+            scores = classifier.predict_proba(x_batch)[:, desired_class]
             real_idx = np.where(y_batch == 1.0)
             scores[real_idx] /= np.mean(scores[real_idx])
             scores[np.where(y_batch == 0.0)] = 1.0
@@ -173,9 +173,9 @@ class TensorFlowBackend(Backend):
     # ------------------------------------------------------------------
 
     def validate_classifier(self, classifier: Any, needs_gradient_flow: bool) -> None:
-        if not hasattr(classifier, "predict"):
+        if not hasattr(classifier, "predict_proba"):
             raise TypeError(
-                "Classifier must have a predict(X) method that returns "
+                "Classifier must have a predict_proba(X) method that returns "
                 "class probabilities as a NumPy array."
             )
         if needs_gradient_flow:

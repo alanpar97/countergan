@@ -34,7 +34,7 @@ class CounterGAN:
         One of ``"regular_gan"``, ``"countergan"``, or ``"countergan_wt"``.
     classifier
         Pre-trained classifier used for counterfactual guidance.  Must
-        expose a ``.predict(X) -> np.ndarray`` method returning class
+        expose a ``.predict_proba(X) -> np.ndarray`` method returning class
         probabilities.  For ``strategy="countergan"``, must also expose a
         ``.model`` attribute returning the underlying framework-native model
         (``torch.nn.Module`` or ``keras.Model``).
@@ -239,8 +239,8 @@ class CounterGAN:
 
         def _log_progress(iteration: int) -> None:
             X_gen = self._backend.predict(self._fitted_generator, X_test)
-            clf_pred_test = self._classifier.predict(X_test)
-            clf_pred = self._classifier.predict(X_gen)
+            clf_pred_test = self._classifier.predict_proba(X_test)
+            clf_pred = self._classifier.predict_proba(X_gen)
             delta = (clf_pred - clf_pred_test)[:, self._desired_class]
             logger.info("=" * 88)
             logger.info("Training iteration %d at %s", iteration, datetime.now())

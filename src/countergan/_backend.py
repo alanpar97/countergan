@@ -108,7 +108,7 @@ class Backend(ABC):
         discriminator
             The discriminator model to update.
         classifier
-            User-provided classifier wrapper (needs ``.predict()`` for the
+            User-provided classifier wrapper (needs ``.predict_proba()`` for the
             weighted variant).
         x_real : np.ndarray
             Batch of real samples.

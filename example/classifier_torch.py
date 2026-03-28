@@ -100,7 +100,7 @@ class Classifier:
         self._log_metrics(X_train, y_train, X_test, y_test)
         return self
 
-    def predict(self, X: np.ndarray) -> np.ndarray:
+    def predict_proba(self, X: np.ndarray) -> np.ndarray:
         """Run inference on the given samples.
 
         Parameters
@@ -138,9 +138,9 @@ class Classifier:
         y_test: np.ndarray,
     ) -> None:
         """Print training and validation accuracy."""
-        train_pred = self.predict(X_train)
+        train_pred = self.predict_proba(X_train)
         train_acc = np.mean(np.argmax(train_pred, axis=1) == np.argmax(y_train, axis=1))
-        val_pred = self.predict(X_test)
+        val_pred = self.predict_proba(X_test)
         val_acc = np.mean(np.argmax(val_pred, axis=1) == np.argmax(y_test, axis=1))
         print(f"Classifier — train: acc={train_acc:.4f}")
         print(f"Classifier — val:   acc={val_acc:.4f}")

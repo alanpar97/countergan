@@ -92,7 +92,7 @@ class Classifier:
         self._log_metrics(history, X_train, y_train, X_test, y_test)
         return self
 
-    def predict(self, X: np.ndarray) -> np.ndarray:
+    def predict_proba(self, X: np.ndarray) -> np.ndarray:
         """Run inference on the given samples.
 
         Parameters

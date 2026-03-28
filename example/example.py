@@ -103,10 +103,10 @@ def main():
     deltas[-len(immutable_features) :] = 0.0
 
     original = dict(zip(features, orig_values))
-    original["Classifier Prediction"] = float(model.predict(sample)[0][1])
+    original["Classifier Prediction"] = float(model.predict_proba(sample)[0][1])
 
     cf = dict(zip(features, cf_values))
-    cf["Classifier Prediction"] = float(model.predict(counterfactual)[0][1])
+    cf["Classifier Prediction"] = float(model.predict_proba(counterfactual)[0][1])
 
     delta = dict(zip(features, deltas))
     delta["Classifier Prediction"] = (

@@ -51,10 +51,10 @@ The classifier you pass to `CounterGAN` must satisfy a simple interface:
 
 | Method / attribute | Required by | Description |
 |---|---|---|
-| `.predict(X) -> np.ndarray` | All strategies | Return class probabilities, shape `(n_samples, n_classes)` |
+| `.predict_proba(X) -> np.ndarray` | All strategies | Return class probabilities, shape `(n_samples, n_classes)` |
 | `.model` | `"countergan"` strategy only | The underlying framework model (`torch.nn.Module` or `keras.Model`) for gradient flow |
 
-The `"countergan_wt"` and `"regular_gan"` strategies only call `.predict()`, so any classifier works. The `"countergan"` strategy backpropagates through the classifier, so `.model` must match the backend (e.g. an `nn.Module` for torch).
+The `"countergan_wt"` and `"regular_gan"` strategies only call `.predict_proba()`, so any classifier works. The `"countergan"` strategy backpropagates through the classifier, so `.model` must match the backend (e.g. an `nn.Module` for torch).
 
 ## Quick start
 
