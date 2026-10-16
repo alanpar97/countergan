@@ -74,18 +74,55 @@ class Discriminator(nn.Module):
 # ---------------------------------------------------------------------------
 
 
+def _resolve_device(classifier: Any) -> torch.device:
+    """Infer the device the classifier lives on, falling back to CPU.
+
+    Checks an explicit ``classifier.device`` attribute first, then the
+    parameters of ``classifier.model`` (if it is an ``nn.Module``).
+    """
+    device = getattr(classifier, "device", None)
+    if device is not None:
+        try:
+            return torch.device(device)
+        except (TypeError, RuntimeError):
+            pass
+
+    model = getattr(classifier, "model", None)
+    if isinstance(model, nn.Module):
+        param = next(model.parameters(), None)
+        if param is not None:
+            return param.device
+
+    return torch.device("cpu")
+
+
+def _module_device(model: nn.Module) -> torch.device:
+    param = next(model.parameters(), None)
+    return param.device if param is not None else torch.device("cpu")
+
+
 class TorchBackend(Backend):
     """Backend implementation using PyTorch."""
+
+    def __init__(self) -> None:
+        self.device = torch.device("cpu")
+
+    # ------------------------------------------------------------------
+    # Device placement
+    # ------------------------------------------------------------------
+
+    def set_device_from_classifier(self, classifier: Any) -> None:
+        self.device = _resolve_device(classifier)
 
     # ------------------------------------------------------------------
     # Model creation
     # ------------------------------------------------------------------
 
     def create_generator(self, input_dim: int, residuals: bool) -> Generator:
-        return Generator(input_dim, residuals)
+        return Generator(input_dim, residuals).to(self.device)
 
     def create_discriminator(self, input_dim: int) -> Discriminator:
-        return Discriminator(input_dim)
+        return Discriminator(input_dim).to(self.device)
 
     # ------------------------------------------------------------------
     # Optimizers & losses
@@ -122,17 +159,19 @@ class TorchBackend(Backend):
         discriminator.train()
 
         with torch.no_grad():
-            x_real_t = torch.tensor(x_real, dtype=torch.float32)
+            x_real_t = torch.tensor(x_real, dtype=torch.float32, device=self.device)
             x_fake_t = generator(x_real_t)
-        x_fake = x_fake_t.numpy()
+        x_fake = x_fake_t.cpu().numpy()
 
         x_batch = np.concatenate([x_real, x_fake])
         y_batch = np.concatenate([np.ones(len(x_real)), np.zeros(len(x_fake))])
         p = np.random.permutation(len(y_batch))
         x_batch, y_batch = x_batch[p], y_batch[p]
 
-        x_t = torch.tensor(x_batch, dtype=torch.float32)
-        y_t = torch.tensor(y_batch.reshape(-1, 1), dtype=torch.float32)
+        x_t = torch.tensor(x_batch, dtype=torch.float32, device=self.device)
+        y_t = torch.tensor(
+            y_batch.reshape(-1, 1), dtype=torch.float32, device=self.device
+        )
 
         # Discriminator optimizer (Adam, same hyperparams as Keras backend)
         if not hasattr(discriminator, "_optim"):
@@ -148,7 +187,7 @@ class TorchBackend(Backend):
             real_idx = np.where(y_batch == 1.0)
             scores[real_idx] /= np.mean(scores[real_idx])
             scores[np.where(y_batch == 0.0)] = 1.0
-            sw = torch.tensor(scores, dtype=torch.float32)
+            sw = torch.tensor(scores, dtype=torch.float32, device=self.device)
 
             per_sample = F.binary_cross_entropy(y_pred, y_t, reduction="none").squeeze()
             d_loss = torch.mean(per_sample * sw)
@@ -172,8 +211,8 @@ class TorchBackend(Backend):
         generator.train()
         discriminator.eval()
 
-        x_t = torch.tensor(x_input, dtype=torch.float32)
-        y_fake_t = torch.ones(len(x_input), 1)
+        x_t = torch.tensor(x_input, dtype=torch.float32, device=self.device)
+        y_fake_t = torch.ones(len(x_input), 1, device=self.device)
 
         gen_optimizer.zero_grad()
 
@@ -183,9 +222,9 @@ class TorchBackend(Backend):
         g_loss = F.binary_cross_entropy(disc_pred, y_fake_t)
 
         if not weighted:
-            clf_pred = classifier.model(x_gen)
+            clf_pred = classifier.model(x_gen).to(self.device)
             # Build one-hot target
-            y_target = torch.zeros(len(x_input), n_classes)
+            y_target = torch.zeros(len(x_input), n_classes, device=self.device)
             y_target[:, desired_class] = 1.0
             # Categorical cross-entropy on probabilities (matches Keras behavior)
             g_loss = g_loss - torch.mean(
@@ -205,8 +244,8 @@ class TorchBackend(Backend):
     @torch.no_grad()
     def predict(self, model: Any, x: np.ndarray) -> np.ndarray:
         model.eval()
-        x_t = torch.tensor(x, dtype=torch.float32)
-        return model(x_t).numpy()
+        x_t = torch.tensor(x, dtype=torch.float32, device=_module_device(model))
+        return model(x_t).cpu().numpy()
 
     # ------------------------------------------------------------------
     # Validation

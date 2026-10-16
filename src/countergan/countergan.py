@@ -94,6 +94,7 @@ class CounterGAN:
             classifier,
             needs_gradient_flow=not self._weighted_version,
         )
+        self._backend.set_device_from_classifier(classifier)
 
         self._classifier = classifier
         self._n_mutable_features = n_mutable_features

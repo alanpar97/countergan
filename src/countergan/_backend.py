@@ -17,6 +17,22 @@ class Backend(ABC):
     """
 
     # ------------------------------------------------------------------
+    # Device placement
+    # ------------------------------------------------------------------
+
+    def set_device_from_classifier(self, classifier: Any) -> None:
+        """Place GAN models and tensors on the classifier's device.
+
+        Called once before training.  The default is a no-op for backends
+        that manage device placement themselves.
+
+        Parameters
+        ----------
+        classifier
+            The classifier wrapper passed to :class:`CounterGAN`.
+        """
+
+    # ------------------------------------------------------------------
     # Model creation
     # ------------------------------------------------------------------
 
